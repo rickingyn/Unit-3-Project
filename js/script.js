@@ -4,6 +4,10 @@ const otherTitle = $('#other-title').hide();
 // select name text field and set focus 
 $('#name').focus();
 
+let $total = $('<p></p>');
+$('.activities').append($total);
+$total.hide();
+
 // create function to show design color based on design option selected
 // change value shown in the select element to be the first option in the updated list
 const showDesignColor = (design) => {
@@ -51,9 +55,6 @@ $('#design').on('change', () => {
 	showDesignColor(selectedDesign);
 });
 
-
-
-
 // create function to check day and time of the activity
 // returns a regex for the activity;
 	// to be used to match the list of activities
@@ -87,6 +88,8 @@ const getRegex = (activity) => {
 		}
 	}
 };
+	// create variable to calculate total cost
+	let total = 0;
 
 // add event listner on activitie's checkbox
 $('.activities input[type="checkbox"]').on('change', function() {
@@ -96,7 +99,10 @@ $('.activities input[type="checkbox"]').on('change', function() {
 	const selectedText = $(this).parent().text();
 
 	// check if checkbox is checked
-	if($('.activities :checked').length > 0) {
+	if($(this).is(':checked')) {
+		// call function to add to total
+		addTotal(selectedText);
+
 		// create variable to call getRegex function to get regex for selected activity;
 		const regexActivity = getRegex(selectedText);
 
@@ -106,13 +112,55 @@ $('.activities input[type="checkbox"]').on('change', function() {
 			if(selectedText !== $(this).text()) {
 				if(regexActivity && regexActivity.test($(this).text())) {
 					$(this).children().attr('disabled', true);
+					$(this).css('color', 'gray');
 				}
 			} 
 		});
-	} else {
+	} else if(!($(this).is(':checked'))) {
+		// call function to subtract from total
+		subtractTotal(selectedText);
+
 		// remove attribute from activity list if unchecked
 		activitiesList.each(function() {
 			$(this).children().removeAttr('disabled');
+			$(this).css('color', 'black');
 		});
 	}
+
+	displayTotal(total);
 });
+
+function addTotal(text) {
+	// conditional statement to add to total price;
+		// 'Main Conference' price is $200
+		// All other activity's price is $100
+	if(text.includes('Main')) {
+		total += 200;
+	} else {
+		total += 100;
+	}
+		return total;
+}
+
+function subtractTotal(text) {
+	// conditional statement to add to total price;
+		// 'Main Conference' price is $200
+		// All other activity's price is $100
+	if(text.includes('Main')) {
+		total -= 200;
+	} else {
+		total -= 100;
+	}
+		return total;
+}
+
+function displayTotal(total) {
+	// display total if activity is selected
+	if(total > 0) {
+		$total.show();
+		$total.text(`Total: $${total}`);
+	} else {
+		// hide total if no activity is selected
+		$total.hide();
+	}
+}
