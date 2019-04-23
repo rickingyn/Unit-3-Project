@@ -179,3 +179,20 @@ button:hover {
 		width: 49%;
 	}
 }
+
+fieldset span {
+  border-radius: 5px;
+  display: inherit;
+  font-size: 1em;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+  color: #85b5ca;
+}
+
+.errorMessage {
+	display:none;
+}
+.errorMessage span {
+	display: none;
+}

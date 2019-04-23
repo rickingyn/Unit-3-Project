@@ -11,15 +11,28 @@ $total.hide();
 // select name text field and set focus
 $("#name").focus();
 
+// select "color" menu and hide
 $('#color').hide();
 $('#color')
 	.prev()
 	.hide();
-
+// hide first payment option (Select Payment Option) and set to "credit card" for "Payment" select menu
 $("#payment option")
 	.eq(0)
 	.hide();
 $("#payment").val("credit card");
+
+// create and append messages in span element
+const $userMessage = $(`<span>Please enter a name.</span>`);
+$userMessage.insertAfter('#name');
+const $emailMessage = $(`<span>Please enter an email.</span>`);
+$emailMessage.insertAfter('#mail');
+const $ccNumMessage = $('<span>Please enter a credit card number</span>');
+$ccNumMessage.insertAfter('#cc-num');
+const $ccZipMessage = $('<span>Please enter the zip code</span>');
+$ccZipMessage.insertAfter('#zip');
+const $ccCVVMessage = $('<span>Please enter the cvv</span>');
+$ccCVVMessage.insertAfter('#cvv');
 
 // create function to show design color based on design option selected
 // change value shown in the select element to be the first option in the updated list
@@ -216,6 +229,9 @@ const validCreditCardCVV = ccCVV => {
 	return /^\d{3}$/.test(ccCVV);
 };
 
+// call function to display payment info when script loads
+displayPaymentInfo();
+
 // add event listener on change in dropdown menu;
 // if 'other' option is selected, show 'other title' text field
 $("#title").on("change", () => {
@@ -293,12 +309,14 @@ $("button").on("click", function(event) {
 	if (!validUser(userName)) {
 		event.preventDefault();
 		$("#name").css("border", "2px solid red");
+		$('#name').next().css('color', 'red');
 	}
-
+	
 	const email = $("#mail").val();
 	if (!validEmail(email)) {
 		event.preventDefault();
 		$("#mail").css("border", "2px solid red");
+		$('#mail').next().css('color', 'red');
 	}
 
 	if (!registerForActivities()) {
@@ -313,18 +331,21 @@ $("button").on("click", function(event) {
 		if (!validCreditCardNumber(ccNum)) {
 			event.preventDefault();
 			$("#cc-num").css("border", "2px solid red");
+			$('#cc-num').next().css('color', 'red');
 		}
 
 		const ccZip = $("#zip").val();
 		if (!validCreditCardZip(ccZip)) {
 			event.preventDefault();
 			$("#zip").css("border", "2px solid red");
+			$('#zip').next().css('color', 'red');
 		}
 
 		const ccCVV = $("#cvv").val();
 		if (!validCreditCardCVV(ccCVV)) {
 			event.preventDefault();
 			$("#cvv").css("border", "2px solid red");
+			$('#cvv').next().css('color', 'red');
 		}
 	}
 });
@@ -336,17 +357,29 @@ $("#name").on("keyup", function() {
 	const valid = validUser(userName);
 	if (valid) {
 		$(this).removeAttr("style");
+		$(this).next().css('color', '#85b5ca');
+	} else {
+		$(this).next().css('color', 'red');
+		$(this).css("border", "2px solid red");	
 	}
 });
 
 $("#mail").on("keyup", function() {
 	const email = $(this).val();
 	const valid = validEmail(email);
-
+	
 	if (valid) {
 		$(this).removeAttr("style");
+		$(this).next().css('color', '#85b5ca');
 	} else {
-		$(this).css("border", "2px solid red");
+		$(this).next().css('color', 'red');
+		if(email === "") {
+			$(this).css("border", "2px solid red");	
+			$(this).next().text('Please enter an email.');
+		} else {
+			$(this).css("border", "2px solid red");
+			$(this).next().text('Email must be in the format: team@treehouse.com');
+		}
 	}
 });
 
@@ -355,7 +388,9 @@ $("#cc-num").on("keyup", function() {
 	const valid = validCreditCardNumber(ccNum);
 	if (valid) {
 		$(this).removeAttr("style");
+		$(this).next().css('color', '#85b5ca');
 	} else {
+		$(this).next().css('color', 'red');
 		$(this).css("border", "2px solid red");
 	}
 });
@@ -365,7 +400,9 @@ $("#zip").on("keyup", function() {
 	const valid = validCreditCardZip(ccZip);
 	if (valid) {
 		$(this).removeAttr("style");
+		$(this).next().css('color', '#85b5ca');
 	} else {
+		$(this).next().css('color', 'red');
 		$(this).css("border", "2px solid red");
 	}
 });
@@ -375,10 +412,41 @@ $("#cvv").on("keyup", function() {
 	const valid = validCreditCardCVV(ccCVV);
 	if (valid) {
 		$(this).removeAttr("style");
+		$(this).next().css('color', '#85b5ca');
 	} else {
+		$(this).next().css('color', 'red');
 		$(this).css("border", "2px solid red");
 	}
 });
 
-// call function to display payment info when script loads
-displayPaymentInfo();
+// create function to hide/show error message
+const showOrHideMessage = (show, element) => {
+	if(show) {
+		element.style.color = 'red';
+	} else {
+		element.style.color = '#85b5ca';
+	}
+};
+
+// create function to hide/show message based on validation
+const createListener = (validator) => {
+	return e => {
+		const text = e.target.value;
+		// create variable to return validation (true or false)
+		const valid = validator(text);
+		// show tip if text is not valid
+		const showTip = !valid;
+		// select span element with message and assign to tooltip variable
+		const tooltip = e.target.nextElementSibling;
+		showOrHideMessage(showTip, tooltip);
+	};
+};
+
+// add event listener to call function to hide/show message based on validation
+$('#mail').on('input', createListener(validUser));
+$('#mail').on('input', createListener(validEmail));
+$('#cc-num').on('input', createListener(validCreditCardNumber));
+$('#zip').on('input', createListener(validCreditCardZip));
+$('#cvv').on('input', createListener(validCreditCardCVV));
+
+
